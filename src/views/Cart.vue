@@ -1,8 +1,8 @@
 <script setup>
-import { getItems, removeItem, removeItemAll } from '@/services/cartService';
-import { reactive, onMounted } from 'vue';
-import { computed } from 'vue';
+import { getItems, removeItem, removeAll } from '@/services/cartService';
+import { ref, reactive, onMounted } from 'vue';
 
+const baseUrl = ref(import.meta.env.VITE_BASE_URL);
 
 const state = reactive({ items: [] });
 const load = async () => {
@@ -13,7 +13,7 @@ const load = async () => {
     state.items = res.data;
 }
 const remove = async cartId => {
-const res = await removeItem(cartId);
+    const res = await removeItem(cartId);
     if(res === undefined || res.status !== 200) {
         return;
     }
@@ -23,22 +23,12 @@ const res = await removeItem(cartId);
     //방금 삭제한 객체만 state.items에서 삭제한다.
 }
 
-// 장바구니 총합계
-const totalPrice = computed(() => {
-    return state.items.reduce((sum, item) => {
-        const discountedPrice = item.price - (item.price * item.discountPer / 100);
-        return sum + discountedPrice;
-    }, 0);
-});
-
 const clear = async () => {
-    const res = await removeItemAll();
-    if (res === undefined || res.status !== 200) {
-        alert('장바구니 비우기에 실패했습니다.');
+    const res = await removeAll();
+    if(res === undefined || res.status !== 200) {
         return;
     }
     state.items = [];
-    alert('장바구니를 모두 비웠습니다.');
 }
 
 onMounted(() => {
@@ -55,7 +45,7 @@ onMounted(() => {
                         <img :alt="`상품 사진(${item.name})`" :src="`/pic/item/${item.imgPath}`" />
                         <b class="name">{{ item.name }}</b>
                         <span class="price">
-                            {{ (item.price - item.price * item.discountPer / 100).toLocaleString() }}원
+                            {{ (item.price - item.price * item.discountPer / 10).toLocaleString() }}원
                         </span>
                         <span class="remove float-end" @click="remove(item.id)" title="삭제">&times;</span>
                     </li>

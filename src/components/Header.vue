@@ -3,17 +3,18 @@ import { useAccountStore } from '@/stores/account';
 import { logout } from '@/services/accountService';
 
 const account = useAccountStore();
+
 //로그아웃
 const logoutAccount = async () => {
-    if(!confirm('로그아웃 하시겠습니까?')) {
-        return;
-    }
-    const res = await logout();
-    if(res === undefined || res.status !== 200) {
-        return;
-    }
-    account.setLoggedIn(false);
-}
+  if (!confirm('로그아웃 하시겠습니까?')) {
+    return;
+  }
+  const res = await logout();
+  if (res === undefined || res.status !== 200) {
+    return;
+  }
+  account.logout();
+};
 </script>
 
 <template>
@@ -24,7 +25,7 @@ const logoutAccount = async () => {
                     <strong>Gallery</strong>
                 </router-link>
                 <div class="menus d-flex gap-3">
-                    <template v-if="account.state.loggedIn">
+                    <template v-if="account.state.isSigned">
                         <a @click="logoutAccount">로그아웃</a>
                         <router-link to="/orders">주문 내역</router-link>
                         <router-link to="/cart">장바구니</router-link>                        

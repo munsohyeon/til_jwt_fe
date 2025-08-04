@@ -1,9 +1,13 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { addItem } from '@/services/cartService';
 import { useAccountStore } from '@/stores/account';
 import { useRouter } from 'vue-router';
 
+const baseUrl = ref(import.meta.env.VITE_BASE_URL);
+
+const accountStore = useAccountStore();
+const router = useRouter();
 
 const props = defineProps({
   item: {
@@ -17,39 +21,28 @@ const props = defineProps({
 //const computedItemDiscountPrice = computed(() => (props.item.price - (props.item.price * props.item.discountPer / 100)).toLocaleString() + '원');
 const computedItemDiscountPrice = computed(() => (props.item.price * ((100 - props.item.discountPer) * 0.01)).toLocaleString() + '원');
 
-const account = useAccountStore();
-
-const router = useRouter();
-
 const put = async () => {
-  if (!account.state.loggedIn) {
-    alert('로그인 후 다시 시도해주세요');
-    return;
-  }
   const res = await addItem(props.item.id);
   if (res === undefined) {
-    alert('서버에 문제가 있습니다.');
+    //alert('서버에 문제가 있습니다.');
     return;
   } else if (res.status === 500) {
-    alert('이미 장바구니에 담겨져 있습니다.');
-  } else if (res.status === 200 && confirm('장바구니에 상품을 담았습니다. 장바구니로 이동하시겠습니까?')) {
-    // 장바구니 화면으로 라우팅
-    console.log('장바구니 담기 성공!')
+    //alert('이미 장바구니에 담겨져 있습니다.');
+  }
+  else if (res.status === 200 && confirm('장바구니에 상품을 담았습니다. 장바구니로 이동하시겠습니까?')) {
+    //장바구니 화면으로 라우팅
+    console.log('카트 담기 성공!');
     router.push('/cart');
   }
+
 }
-
-onMounted(() => {
-  console.log("이미지 경로 확인용",props.item.imgPath);
-})
-
 </script>
 
 <template>
   <div class="card shadow-sm">
     <!-- 상품 사진 aria-label은 영역에 대한 설명 -->
-    <span class="img" :style="{ backgroundImage: `url(/pic/item/${props.item.imgPath})` }"
-      :aria-label="`상품사진(${props.item.name})`"></span>
+    <span class="img" :style="{backgroundImage: `url(${baseUrl}/pic/item/${props.item.imgPath})`}" 
+                                :aria-label="`상품사진(${props.item.name})`"></span> 
     <div class="card-body">
       <p class="card-text">
         <!-- 상품 이름 -->
